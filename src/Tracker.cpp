@@ -33,6 +33,7 @@
 #include "GraphUtils/GraphUtils.h"
 
 #include "HaarFeatures.h"
+#include "LBPFeatures.h"
 #include "RawFeatures.h"
 #include "HistogramFeatures.h"
 #include "MultiFeatures.h"
@@ -106,7 +107,13 @@ void Tracker::Reset()
 			m_features.push_back(new HistogramFeatures(m_config));
 			m_needsIntegralHist = true;
 			break;
+        case Config::kFeatureLBP:
+            m_features.push_back(new LBPFeatures(m_config));
+            m_needsIntegralHist = false; // not sure
+            m_needsIntegralImage = false; // not sure
+            break;
 		}
+
 		featureCounts.push_back(m_features.back()->GetCount());
 		
 		switch (m_config.features[i].kernel)
