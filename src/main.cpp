@@ -121,9 +121,17 @@ int main(int argc, char* argv[])
 			cout << "error: could not parse sequence frames file" << endl;
 			return EXIT_FAILURE;
 		}
-		
-		imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/imgs/img%05d.png";
-		
+
+        if (conf.features[0].feature == 3) // 3 is LBP
+        {
+            cout << "LBP selected. We need to load depth data instead of RGB" << endl;
+            imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/img%05d.png";
+        }
+        else
+        {
+            imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/imgs/img%05d.png";
+        }
+
 		// read first frame to get size
 		char imgPath[256];
 		sprintf(imgPath, imgFormat.c_str(), startFrame);
