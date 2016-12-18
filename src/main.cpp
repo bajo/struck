@@ -34,6 +34,9 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+//SIMON MÖRDERDEBUG
+//#include <cstdlib>
+
 using namespace std;
 using namespace cv;
 
@@ -48,6 +51,10 @@ void rectangle(Mat& rMat, const FloatRect& rRect, const Scalar& rColour)
 
 int main(int argc, char* argv[])
 {
+    //SIMONS killerdebug
+    //system("pwd");
+    //return 0;
+    
 	// read config file
 	string configPath = "config.txt";
 	if (argc > 1)
@@ -85,7 +92,8 @@ int main(int argc, char* argv[])
 	string imgFormat;
 	float scaleW = 1.f;
 	float scaleH = 1.f;
-	
+    vector<string> inputFiles;
+	bool isPrinceton=false;
 	if (useCamera)
 	{
 		if (!cap.open(0))
@@ -108,58 +116,123 @@ int main(int argc, char* argv[])
 		// parse frames file
 		string framesFilePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/"+conf.sequenceName+"_frames.txt";
 		ifstream framesFile(framesFilePath.c_str(), ios::in);
+        
 		if (!framesFile)
 		{
-			cout << "error: could not open sequence frames file: " << framesFilePath << endl;
-			return EXIT_FAILURE;
+			cout << "Could not open sequence frames file: " << framesFilePath << endl <<
+                    "Trying out if dataset is in princeton format" << endl;
+            if(conf.features[0].feature == 3){
+                framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/depthList.txt";
+                //ifstream file(framesFilePath, ios::in);
+                framesFile.open(framesFilePath,ios::in);
+            }else{
+                framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/rgbList.txt";
+                //ifstream file(framesFilePath, ios::in);
+                framesFile.open(framesFilePath,ios::in);
+            }
+            if(!framesFile){
+                cout << "error: could not open sequence frames file: " << framesFilePath << endl;
+                return EXIT_FAILURE;
+            }
+            isPrinceton=true;
 		}
-		string framesLine;
-		getline(framesFile, framesLine);
-		sscanf(framesLine.c_str(), "%d,%d", &startFrame, &endFrame);
-		if (framesFile.fail() || startFrame == -1 || endFrame == -1)
-		{
-			cout << "error: could not parse sequence frames file" << endl;
-			return EXIT_FAILURE;
-		}
+        //TODO: Simon here might be a good point to put in the other way to read the files
+        if(!isPrinceton){
+            string framesLine;
+            getline(framesFile, framesLine);
+            sscanf(framesLine.c_str(), "%d,%d", &startFrame, &endFrame);
+            if (framesFile.fail() || startFrame == -1 || endFrame == -1)
+            {
+                cout << "error: could not parse sequence frames file" << endl;
+                return EXIT_FAILURE;
+            }
 
-        if (conf.features[0].feature == 3) // 3 is LBP
-        {
-            cout << "LBP selected. We need to load depth data instead of RGB" << endl;
-            imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/img%05d.png";
-        }
-        else
-        {
-            imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/imgs/img%05d.png";
-        }
+            if (conf.features[0].feature == 3) // 3 is LBP
+            {
+                cout << "LBP selected. We need to load depth data instead of RGB" << endl;
+                imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/img%05d.png";
+            }
+            else
+            {
+                imgFormat = conf.sequenceBasePath+"/"+conf.sequenceName+"/imgs/img%05d.png";
+            }
 
-		// read first frame to get size
-		char imgPath[256];
-		sprintf(imgPath, imgFormat.c_str(), startFrame);
-		Mat tmp = cv::imread(imgPath, 0);
-		scaleW = (float)conf.frameWidth/tmp.cols;
-		scaleH = (float)conf.frameHeight/tmp.rows;
-		
-		// read init box from ground truth file
-		string gtFilePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/"+conf.sequenceName+"_gt.txt";
-		ifstream gtFile(gtFilePath.c_str(), ios::in);
-		if (!gtFile)
-		{
-			cout << "error: could not open sequence gt file: " << gtFilePath << endl;
-			return EXIT_FAILURE;
-		}
-		string gtLine;
-		getline(gtFile, gtLine);
-		float xmin = -1.f;
-		float ymin = -1.f;
-		float width = -1.f;
-		float height = -1.f;
-		sscanf(gtLine.c_str(), "%f,%f,%f,%f", &xmin, &ymin, &width, &height);
-		if (gtFile.fail() || xmin < 0.f || ymin < 0.f || width < 0.f || height < 0.f)
-		{
-			cout << "error: could not parse sequence gt file" << endl;
-			return EXIT_FAILURE;
-		}
-		initBB = FloatRect(xmin*scaleW, ymin*scaleH, width*scaleW, height*scaleH);
+            // read first frame to get size
+            char imgPath[256];
+            sprintf(imgPath, imgFormat.c_str(), startFrame);
+            Mat tmp = cv::imread(imgPath, 0);
+            scaleW = (float)conf.frameWidth/tmp.cols;
+            scaleH = (float)conf.frameHeight/tmp.rows;
+            
+            // read init box from ground truth file
+            string gtFilePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/"+conf.sequenceName+"_gt.txt";
+            ifstream gtFile(gtFilePath.c_str(), ios::in);
+            if (!gtFile)
+            {
+                cout << "error: could not open sequence gt file: " << gtFilePath << endl;
+                return EXIT_FAILURE;
+            }
+            string gtLine;
+            getline(gtFile, gtLine);
+            float xmin = -1.f;
+            float ymin = -1.f;
+            float width = -1.f;
+            float height = -1.f;
+            sscanf(gtLine.c_str(), "%f,%f,%f,%f", &xmin, &ymin, &width, &height);
+            if (gtFile.fail() || xmin < 0.f || ymin < 0.f || width < 0.f || height < 0.f)
+            {
+                cout << "error: could not parse sequence gt file" << endl;
+                return EXIT_FAILURE;
+            }
+            initBB = FloatRect(xmin*scaleW, ymin*scaleH, width*scaleW, height*scaleH);
+        }else{
+            string firstFrame;
+            getline(framesFile,firstFrame);
+            string filePath;
+            if ( conf.features[0].feature == 3){
+                filePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/"+firstFrame;
+            }else{
+                filePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+firstFrame;
+            }
+            startFrame=0;
+            inputFiles.push_back(firstFrame);
+            endFrame=1;
+            while(getline(framesFile,firstFrame)){
+                endFrame++;
+                inputFiles.push_back(firstFrame);
+            }
+            Mat tmp = imread(filePath,CV_LOAD_IMAGE_UNCHANGED); //some bytes have to be changed (otherwise they are in mm)
+            //"depth image folder : images are in 16 bit png format, with the first 3 bit swap to the last (for visilization purpose Users need to swap them back after reading the image. Values at each pixel are the distance from Kinect to the object in mm."
+            scaleW = (float)conf.frameWidth/tmp.cols;
+            scaleH = (float)conf.frameHeight/tmp.rows;
+            
+            //TODO: from here on
+            string gtFilePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/"+conf.sequenceName+".txt";
+            ifstream gtFile(gtFilePath.c_str(), ios::in);
+            if (!gtFile)
+            {
+                cout << "error: could not open sequence gt file: " << gtFilePath << endl;
+                return EXIT_FAILURE;
+            }
+            string gtLine;
+            getline(gtFile, gtLine);
+            float xmin = -1.f;
+            float ymin = -1.f;
+            float width = -1.f;
+            float height = -1.f;
+            sscanf(gtLine.c_str(), "%f,%f,%f,%f", &xmin, &ymin, &width, &height);
+            if(isPrinceton){//in the princeton dataset the boundingbox would otherwise sometimes leave the image -> (ASSERTION)
+                xmin--;
+                ymin--;
+            }
+            if (gtFile.fail() || xmin < 0.f || ymin < 0.f || width < 0.f || height < 0.f)
+            {
+                cout << "error: could not parse sequence gt file" << endl;
+                return EXIT_FAILURE;
+            }
+            initBB = FloatRect(xmin*scaleW, ymin*scaleH, width*scaleW, height*scaleH);
+            
+        }
 	}
 	
 	
@@ -202,17 +275,44 @@ int main(int argc, char* argv[])
 			}
 		}
 		else
-		{			
-			char imgPath[256];
-			sprintf(imgPath, imgFormat.c_str(), frameInd);
-			Mat frameOrig = cv::imread(imgPath, 0);
-			if (frameOrig.empty())
-			{
-				cout << "error: could not read frame: " << imgPath << endl;
-				return EXIT_FAILURE;
-			}
+		{
+            Mat frameOrig;
+            if (isPrinceton){
+                
+                string imgPath;
+                if ( conf.features[0].feature == 3){
+                    imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/"+inputFiles[frameInd];
+                }else{
+                    imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];
+                }
+                frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
+                if (frameOrig.empty())
+                {
+                    cout << "error: could not read frame: " << imgPath << endl;
+                    return EXIT_FAILURE;
+                }
+            }else{
+                char imgPath[256];
+                sprintf(imgPath, imgFormat.c_str(), frameInd);//TODO(SIMON): read the frame at full color depth CV_READ_UNCHANGED or something similar
+                frameOrig = cv::imread(imgPath, 0);
+                if (frameOrig.empty())
+                {
+                    cout << "error: could not read frame: " << imgPath << endl;
+                    return EXIT_FAILURE;
+                }
+            }
 			resize(frameOrig, frame, Size(conf.frameWidth, conf.frameHeight));
-			cvtColor(frame, result, CV_GRAY2RGB);
+
+            
+            if(frame.channels()==1){
+                cvtColor(frame, result, CV_GRAY2RGB);
+            }else{
+                if(frame.channels()==3){
+                    result = frame;
+                }else{
+                    cout << "error: image has unknown format" << endl;
+                }
+            }
 		
 			if (frameInd == startFrame)
 			{
