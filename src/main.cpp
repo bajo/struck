@@ -285,6 +285,7 @@ int main(int argc, char* argv[])
                 }else{
                     imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];
                 }
+                //read it unchanged: otherwise the depth images get 
                 frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
                 if (frameOrig.empty())
                 {
@@ -293,7 +294,7 @@ int main(int argc, char* argv[])
                 }
             }else{
                 char imgPath[256];
-                sprintf(imgPath, imgFormat.c_str(), frameInd);//TODO(SIMON): read the frame at full color depth CV_READ_UNCHANGED or something similar
+                sprintf(imgPath, imgFormat.c_str(), frameInd);
                 frameOrig = cv::imread(imgPath, 0);
                 if (frameOrig.empty())
                 {

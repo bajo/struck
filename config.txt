@@ -39,7 +39,7 @@ svmBudgetSize = 100
 #   kernel = gaussian/linear/intersection/chi2
 #   for kernel=gaussian, kernel-params is sigma
 # multiple features can be specified and will be combined
-feature = haar gaussian 0.2
+#feature = haar gaussian 0.2
 #feature = raw gaussian 0.1
 #feature = histogram intersection
-#feature = LBP gaussian 0.2
+feature = LBP gaussian 0.2
