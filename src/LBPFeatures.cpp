@@ -48,10 +48,6 @@ LBPFeatures::LBPFeatures(const Config& conf)
     int length =m_HD*m_VD* factorial(m_cellWidth*m_cellHeight)/(2*factorial(m_cellWidth*m_cellHeight-2));
     SetCount(length);
     
-    cout << "I hope this count is about 432 " << length << endl;
-    
-
-        cout << "LBPFeatures.cpp: LBPFeatures::LBPFeatures(const Config& conf) TODO: actually do something " << GetCount() << endl;
 }
 
 LBPFeatures::~LBPFeatures(){
@@ -73,10 +69,14 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
     Mat work;
     resize(moi,work,cv::Size(m_HD*m_cellWidth,m_VD*m_cellHeight));
     int k=0;
+    //calc data vector
     for(int m=0;m<m_VD;m++){
         for(int n=0;n<m_HD;n++){
             cv::Rect coi(n*m_cellWidth,m*m_cellHeight,m_cellWidth,m_cellHeight);
             Mat cell=work(coi);
+            if(cell.type()!=CV_16UC1){
+                cout << "shit" << endl;//at least this seems right
+            }
             for(int i=0;i<m_cellHeight*m_cellWidth;i++){
                 for(int j=i+1;j<m_cellHeight*m_cellWidth;j++){
                     float data=(float)cell.at<uint16_t>(i)-(float)cell.at<uint16_t>(j);
@@ -88,29 +88,4 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
             
         }
     }
-    cout << "k " << k << endl;
-    //calc datapoint
-    
-    
-    
-    /*for (int i = 0; i < (int)m_rects.size(); ++i)
-    {
-        const FloatRect& r = m_rects[i];
-        IntRect sampleRect((int)(roi.XMin()+r.XMin()*roi.Width()+0.5f), (int)(roi.YMin()+r.YMin()*roi.Height()+0.5f),
-                           (int)(r.Width()*roi.Width()), (int)(r.Height()*roi.Height()));
-        value += m_weights[i]*image.Sum(sampleRect);
-    }
-    return value / (m_factor*roi.Area()*m_bb.Area());
-    */
-    
-    //first: get frame rect:
-    
-    
-    //second: rescale it to m_HD*m_xellWidth x mVD*m_cellHeight
-    
-    //third: calculate descriptor
-    
-    
-    //fourth: profit
-        cout << "LBPFeatures.cpp: void LBPFeatures::UpdateFeatureVector(const Sample& s) TODO: actually do something " << GetCount() << endl;
 }

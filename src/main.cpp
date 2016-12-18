@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
                 }else{
                     imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];
                 }
-                //read it unchanged: otherwise the depth images get 
+                //read it unchanged: otherwise the depth images get
                 frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
                 if (frameOrig.empty())
                 {
@@ -309,12 +309,22 @@ int main(int argc, char* argv[])
                 cvtColor(frame, result, CV_GRAY2RGB);
             }else{
                 if(frame.channels()==3){
-                    result = frame;
+                    result = frame.clone();
+                   
+                    
                 }else{
                     cout << "error: image has unknown format" << endl;
                 }
             }
-		
+            if ( conf.features[0].feature == 3){
+                //get the bits into correct order.
+                for(int i=0;i<frame.cols*frame.rows;i++){
+                    uint16_t pixel=frame.at<uint16_t>(i);
+                    frame.at<uint16_t>(i)=pixel>>3 | pixel<<13;
+                }
+                imshow("frame",frame);
+            }
+            
 			if (frameInd == startFrame)
 			{
 				tracker.Initialise(frame, initBB);
