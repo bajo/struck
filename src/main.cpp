@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
                     
                     //read it unchanged: otherwise the depth images get
                     imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/"+inputFiles[frameInd];
-                    frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
+                    frameOrig = cv::imread(imgPath);//, CV_LOAD_IMAGE_UNCHANGED);
                 }else{
                     imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];//DEBUG: rgb
                     frameOrig = cv::imread(imgPath);
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
                 //get the bits into correct order.
                 for(int i=0;i<frame.cols*frame.rows;i++){
                     uint16_t pixel=frame.at<uint16_t>(i);
-                    frame.at<uint16_t>(i)=pixel>>3 | pixel<<13;
+                    //frame.at<uint16_t>(i)=pixel>>3 | pixel<<13;
                 }
                 //imshow("frame",frame);
             }

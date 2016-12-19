@@ -70,8 +70,7 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
     while(subCellWidth*m_HD*m_cellWidth<roi.Width()){
         subCellWidth++;
     }
-    
-    
+
     int subCellHeight=1;
     while(subCellHeight*m_VD*m_cellHeight<roi.Height()){
         subCellHeight++;
@@ -85,20 +84,27 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
     Mat work;
     resize(moi,work,cv::Size(subCellWidth*m_HD*m_cellWidth,subCellHeight*m_VD*m_cellHeight));
     Mat scaled(m_VD*m_cellHeight,m_HD*m_cellWidth,CV_32FC1);
+    int centerDepth = work.at<uint8_t>(work.rows/2,work.cols/2);
+    for(int i=0;i<work.rows*work.cols;i++){
+        if(work.at<uint8_t>(i)>centerDepth+10){
+            work.at<uint8_t>(i)=0;
+        }
+    }
     scaled.setTo(cv::Scalar(0));
     
     for(int m=0;m<m_VD*m_cellHeight;m++){
         for(int n=0;n<m_HD*m_cellWidth;n++){
+            
             for(int i=0;i<subCellHeight;i++){
                 for(int j=0;j<subCellWidth;j++){
-                    scaled.at<float>(m,n)+=scale*(float)work.at<uint16_t>(m*subCellHeight+i,n*subCellWidth+j);
+                    scaled.at<float>(m,n)+=scale*(float)work.at<uint8_t>(m*subCellHeight+i,n*subCellWidth+j);
                 }
             }
         }
     }
-    imshow("rectOfInterest",moi*10);
-    imshow("rectOfInterestScaled",work*10);
-    imshow("rectOfInterestScaledDown",scaled*1.0f/25500.0f);
+    imshow("rectOfInterestScaled",work);
+    imshow("rectOfInterest",moi);
+    imshow("rectOfInterestScaledDown",scaled*1.0f/255.0f);
     waitKey(1);
     int k=0;
     //calc data vector
