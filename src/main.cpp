@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
                 //ifstream file(framesFilePath, ios::in);
                 framesFile.open(framesFilePath,ios::in);
             }else{
-                framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/rgbList.txt";
+                framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/rgbList.txt";//DEBUG rgbList.txt
                 //ifstream file(framesFilePath, ios::in);
                 framesFile.open(framesFilePath,ios::in);
             }
@@ -192,14 +192,16 @@ int main(int argc, char* argv[])
             if ( conf.features[0].feature == 3){
                 filePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/"+firstFrame;
             }else{
-                filePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+firstFrame;
+                filePath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+firstFrame;//DEBUG: rgb
             }
             startFrame=0;
             inputFiles.push_back(firstFrame);
             endFrame=1;
             while(getline(framesFile,firstFrame)){
-                endFrame++;
-                inputFiles.push_back(firstFrame);
+                if(firstFrame!=""){
+                    endFrame++;
+                    inputFiles.push_back(firstFrame);
+                }
             }
             Mat tmp = imread(filePath,CV_LOAD_IMAGE_UNCHANGED); //some bytes have to be changed (otherwise they are in mm)
             //"depth image folder : images are in 16 bit png format, with the first 3 bit swap to the last (for visilization purpose Users need to swap them back after reading the image. Values at each pixel are the distance from Kinect to the object in mm."
@@ -221,7 +223,8 @@ int main(int argc, char* argv[])
             float width = -1.f;
             float height = -1.f;
             sscanf(gtLine.c_str(), "%f,%f,%f,%f", &xmin, &ymin, &width, &height);
-            if(isPrinceton){//in the princeton dataset the boundingbox would otherwise sometimes leave the image -> (ASSERTION)
+            if(isPrinceton)
+            {
                 xmin--;
                 ymin--;
             }
@@ -281,12 +284,14 @@ int main(int argc, char* argv[])
                 
                 string imgPath;
                 if ( conf.features[0].feature == 3){
+                    
+                    //read it unchanged: otherwise the depth images get
                     imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/depth/"+inputFiles[frameInd];
+                    frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
                 }else{
-                    imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];
+                    imgPath = conf.sequenceBasePath+"/"+conf.sequenceName+"/rgb/"+inputFiles[frameInd];//DEBUG: rgb
+                    frameOrig = cv::imread(imgPath);
                 }
-                //read it unchanged: otherwise the depth images get
-                frameOrig = cv::imread(imgPath, CV_LOAD_IMAGE_UNCHANGED);
                 if (frameOrig.empty())
                 {
                     cout << "error: could not read frame: " << imgPath << endl;
@@ -322,7 +327,7 @@ int main(int argc, char* argv[])
                     uint16_t pixel=frame.at<uint16_t>(i);
                     frame.at<uint16_t>(i)=pixel>>3 | pixel<<13;
                 }
-                imshow("frame",frame);
+                //imshow("frame",frame);
             }
             
 			if (frameInd == startFrame)
