@@ -124,11 +124,11 @@ int main(int argc, char* argv[])
             if(conf.features[0].feature == 3){
                 framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/depthList.txt";
                 //ifstream file(framesFilePath, ios::in);
-                framesFile.open(framesFilePath,ios::in);
+                framesFile.open(framesFilePath.c_str(),ios::in);
             }else{
                 framesFilePath = conf.sequenceBasePath+ "/"+conf.sequenceName+"/rgbList.txt";//DEBUG rgbList.txt
                 //ifstream file(framesFilePath, ios::in);
-                framesFile.open(framesFilePath,ios::in);
+                framesFile.open(framesFilePath.c_str(),ios::in);
             }
             if(!framesFile){
                 cout << "error: could not open sequence frames file: " << framesFilePath << endl;
@@ -250,6 +250,7 @@ int main(int argc, char* argv[])
 	bool paused = false;
 	bool doInitialise = false;
 	srand(conf.seed);
+    endFrame -= 1; // HACK: Otherwise we read on frame over the end of the sequence.
 	for (int frameInd = startFrame; frameInd <= endFrame; ++frameInd)
 	{
 		Mat frame;
@@ -294,7 +295,7 @@ int main(int argc, char* argv[])
                 }
                 if (frameOrig.empty())
                 {
-                    cout << "error: could not read frame: " << imgPath << endl;
+                    cout << "PRINCETON: error: could not read frame: " << imgPath << endl;
                     return EXIT_FAILURE;
                 }
             }else{
@@ -303,7 +304,7 @@ int main(int argc, char* argv[])
                 frameOrig = cv::imread(imgPath, 0);
                 if (frameOrig.empty())
                 {
-                    cout << "error: could not read frame: " << imgPath << endl;
+                    cout << "NOT PRINCETON: error: could not read frame: " << imgPath << endl;
                     return EXIT_FAILURE;
                 }
             }
@@ -323,16 +324,17 @@ int main(int argc, char* argv[])
             }
             if ( conf.features[0].feature == 3){
                 //get the bits into correct order.
-                for(int i=0;i<frame.cols*frame.rows;i++){
-                    uint16_t pixel=frame.at<uint16_t>(i);
+              /*  for(int i=0;i<frame.cols*frame.rows;i++){
+                       uint16_t pixel=frame.at<uint16_t>(i);
                     //frame.at<uint16_t>(i)=pixel>>3 | pixel<<13;
                 }
-                //imshow("frame",frame);
+              */
+
             }
             
 			if (frameInd == startFrame)
 			{
-				tracker.Initialise(frame, initBB);
+                tracker.Initialise(frame, initBB);
 			}
 		}
 		

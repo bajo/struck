@@ -77,8 +77,7 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
     }
     float scale=1.0f/((float)subCellWidth*(float)subCellHeight);
     
-    
-    
+    m_featVec.setZero();
     
     //scale:
     Mat work;
@@ -90,6 +89,7 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
             work.at<uint8_t>(i)=0;
         }
     }
+
     scaled.setTo(cv::Scalar(0));
     
     for(int m=0;m<m_VD*m_cellHeight;m++){
@@ -102,10 +102,11 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
             }
         }
     }
-    imshow("rectOfInterestScaled",work);
-    imshow("rectOfInterest",moi);
-    imshow("rectOfInterestScaledDown",scaled*1.0f/255.0f);
-    waitKey(1);
+    //imshow("rectOfInterestScaled",work);
+    //imshow("rectOfInterest",moi);
+    //imshow("rectOfInterestScaledDown",scaled*1.0f/255.0f);
+    //waitKey(1);
+
     int k=0;
     //calc data vector
     for(int m=0;m<m_VD;m++){
@@ -121,4 +122,7 @@ void LBPFeatures::UpdateFeatureVector(const Sample& s)
             }
         }
     }
+    int x = (m_featVec.array() != 0).count();
+   // cout << "Number of non-zero elements in m_featVec is: " << x << endl;
+
 }

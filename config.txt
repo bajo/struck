@@ -42,4 +42,4 @@ svmBudgetSize = 100
 #feature = haar gaussian 0.2
 #feature = raw gaussian 0.1
 #feature = histogram intersection
-feature = LBP gaussian 0.2
+feature = LBP linear 0.2
