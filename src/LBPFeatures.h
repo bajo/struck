@@ -35,9 +35,14 @@ class Config;
 class LBPFeatures : public Features
 {
 public:
-        LBPFeatures(const Config& conf);
+    LBPFeatures(const Config& conf);
+    ~LBPFeatures();
 	
 private:
+    int m_VD;
+    int m_HD;
+    int m_cellWidth;
+    int m_cellHeight;
 	
 	virtual void UpdateFeatureVector(const Sample& s);
 };
